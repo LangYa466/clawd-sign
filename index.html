@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clawd 举牌 · 像素举牌生成器</title>
+    <meta name="description" content="A pixel-art crab holds up your sign. Pixel fonts for almost every language, light / dark / system themes, PNG & SVG export. 像素小螃蟹替你举牌，支持超多语言。" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f5f3ee" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#151412" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta property="og:title" content="Clawd Sign · 像素举牌" />
+    <meta property="og:description" content="A pixel-art crab holds up your sign — in almost any language." />
+    <meta property="og:image" content="/og.png" />
+    <link rel="stylesheet" href="/fonts/fusion-pixel/12px/zh_hans/Fusion-Pixel-12px-Proportional-Simplified-Chinese.css" />
+    <script>
+      // Apply the saved theme before first paint to avoid a flash.
+      try {
+        var t = JSON.parse(localStorage.getItem('clawd-sign:prefs') || '{}').theme;
+        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,30 @@
+{
+  "name": "clawd-sign",
+  "private": true,
+  "version": "1.0.0",
+  "description": "A customizable pixel-art mascot holding a sign. Pixel fonts with huge multi-language coverage, light/dark/system themes, PNG/SVG export.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "fonts": "node scripts/sync-fonts.mjs",
+    "predev": "npm run fonts",
+    "dev": "vite",
+    "prebuild": "npm run fonts",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -b"
+  },
+  "dependencies": {
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@fontsource/unifont": "^5.3.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.2.1",
+    "@vp-tw/cjk-web-fonts-fusion-pixel-font": "0.0.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5"
+  }
+}
