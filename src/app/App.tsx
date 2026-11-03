@@ -16,7 +16,7 @@ import { shade } from './color';
 import { REPO_URL } from './constants';
 import { ALL_SECTIONS, Controls, type Update } from './Controls';
 import { DICTS, detectLang, type Key, type Lang } from './i18n';
-import { Icon } from './icons';
+import { Icon, type IconName } from './icons';
 import { Logo } from './Logo';
 import { decodeHash, encodeHash, loadPrefs, loadSaved, reactSnippet, save, savePrefs, shareableOptions } from './state';
 import { ScrollRow, Segmented, Toggle, useMediaQuery } from './ui';
@@ -41,6 +41,39 @@ function download(blob: Blob, name: string) {
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function ToolButton({
+  icon,
+  label,
+  title,
+  onClick,
+  disabled,
+  pressed,
+  primary,
+}: {
+  icon: IconName;
+  label: string;
+  title: string;
+  onClick: () => void;
+  disabled?: boolean;
+  pressed?: boolean;
+  primary?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      className={primary ? 'tool tool-primary' : 'tool'}
+      onClick={onClick}
+      disabled={disabled}
+      aria-pressed={pressed}
+      aria-label={title}
+      title={title}
+    >
+      <Icon name={icon} size={16} />
+      <span aria-hidden="true">{label}</span>
+    </button>
+  );
 }
 
 export function App() {
@@ -231,8 +264,19 @@ export function App() {
                 </span>
               )}
             </div>
+            {!wide ? (
+              /* Phones: every action visible at once as an icon toolbar — nothing to swipe. */
+              <div className="toolbar" role="toolbar" aria-label={t('sec.actions')}>
+                <ToolButton icon="checker" label={t('tool.transparent')} title={t('bg.transparentQuick')} pressed={transparent} onClick={() => setTransparentBg(!transparent)} />
+                <ToolButton icon="download" label="PNG" title={t('action.png')} primary onClick={downloadPng} disabled={!scene} />
+                <ToolButton icon="download" label="SVG" title={t('action.svg')} onClick={downloadSvg} disabled={!scene} />
+                <ToolButton icon="copy" label={t('tool.copy')} title={t('action.copy')} onClick={copyImage} disabled={!scene} />
+                <ToolButton icon="link" label={t('tool.link')} title={t('action.link')} onClick={copyLink} />
+                <ToolButton icon="dice" label={t('tool.random')} title={t('action.random')} onClick={shuffle} />
+                <ToolButton icon="reset" label={t('tool.reset')} title={t('action.reset')} onClick={reset} />
+              </div>
+            ) : (
             <ScrollRow className="actions">
-              {!wide && <Toggle className="toggle-compact" label={t('bg.transparentShort')} checked={transparent} onChange={setTransparentBg} />}
               <button type="button" className="btn btn-primary" onClick={downloadPng} disabled={!scene}>
                 <Icon name="download" size={14} /> {t('action.png')}
               </button>
@@ -253,6 +297,7 @@ export function App() {
                 <Icon name="reset" size={14} /> {t('action.reset')}
               </button>
             </ScrollRow>
+            )}
           </section>
 
           {/* Desktop: the most-used settings fill the space under the preview. */}
