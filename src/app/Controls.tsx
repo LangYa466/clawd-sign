@@ -30,8 +30,8 @@ interface Props {
   embed: { iframe: string; react: string; url: string };
   /** Which groups of settings to show, in order. */
   sections: SectionId[];
-  /** `stack`: collapsible sections (phones) · `cards`: static cards · `tabs`: one group at a time. */
-  layout: 'stack' | 'cards' | 'tabs';
+  /** `cards`: every group as a card · `tabs`: one group at a time. */
+  layout: 'cards' | 'tabs';
 }
 
 export type SectionId = 'text' | 'font' | 'palette' | 'sign' | 'mascot' | 'background' | 'canvas' | 'embed';
@@ -419,7 +419,7 @@ export function Controls({ options: o, update, palette, t, lang, toast, exportSc
   return (
     <div className={`controls controls-${layout}`}>
       {sections.map((id) => (
-        <Section key={id} title={t(`sec.${id}` as Key)} collapsible={layout === 'stack'} defaultOpen={id !== 'embed'}>
+        <Section key={id} title={t(`sec.${id}` as Key)}>
           {bodies[id]}
         </Section>
       ))}

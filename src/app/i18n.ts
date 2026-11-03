@@ -6,6 +6,7 @@ const zh = {
   'theme.system': '跟随系统',
   'theme.label': '主题',
   'lang.switch': 'English',
+  'lang.short': 'EN',
   'nav.source': '开源',
 
   'sec.text': '文字',
@@ -92,6 +93,7 @@ const zh = {
   'bg.theme': '主题',
   'bg.transparent': '透明',
   'bg.transparentQuick': '透明背景',
+  'bg.transparentShort': '透明背景',
   'bg.color': '纯色',
   'bg.gradient': '渐变',
   'bg.pattern': '图案',
@@ -162,6 +164,7 @@ const en: Dict = {
   'theme.system': 'System',
   'theme.label': 'Theme',
   'lang.switch': '中文',
+  'lang.short': '中',
   'nav.source': 'Open source',
 
   'sec.text': 'Text',
@@ -248,6 +251,7 @@ const en: Dict = {
   'bg.theme': 'Theme',
   'bg.transparent': 'None',
   'bg.transparentQuick': 'Transparent background',
+  'bg.transparentShort': 'Transparent',
   'bg.color': 'Solid',
   'bg.gradient': 'Gradient',
   'bg.pattern': 'Pattern',

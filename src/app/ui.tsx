@@ -14,41 +14,32 @@ export function useMediaQuery(query: string): boolean {
   );
 }
 
-export function Section({
-  title,
-  children,
-  defaultOpen = true,
-  collapsible = true,
-}: {
-  title: string;
-  children: ReactNode;
-  defaultOpen?: boolean;
-  collapsible?: boolean;
-}) {
-  if (!collapsible) {
-    return (
-      <section className="section section-static">
-        <h2 className="section-head">
-          <span className="section-title">{title}</span>
-        </h2>
-        <div className="section-body">{children}</div>
-      </section>
-    );
-  }
+export function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <details className="section" open={defaultOpen}>
-      <summary>
+    <section className="section">
+      <h2 className="section-head">
         <span className="section-title">{title}</span>
-        <Icon name="chevron" size={12} className="section-chevron" />
-      </summary>
+      </h2>
       <div className="section-body">{children}</div>
-    </details>
+    </section>
   );
 }
 
-export function Field({ label, hint, children, htmlFor }: { label: string; hint?: ReactNode; children: ReactNode; htmlFor?: string }) {
+export function Field({
+  label,
+  hint,
+  children,
+  htmlFor,
+  className,
+}: {
+  label: string;
+  hint?: ReactNode;
+  children: ReactNode;
+  htmlFor?: string;
+  className?: string;
+}) {
   return (
-    <div className="field">
+    <div className={className ? `field ${className}` : 'field'}>
       <label className="field-label" htmlFor={htmlFor}>
         {label}
       </label>
@@ -79,7 +70,7 @@ export function Slider({
 }) {
   const id = useId();
   return (
-    <Field label={label} hint={hint} htmlFor={id}>
+    <Field label={label} hint={hint} htmlFor={id} className="field-slider">
       <div className="slider">
         <input id={id} type="range" min={min} max={max} step={step} value={value} onChange={(e) => onChange(Number(e.target.value))} />
         <output htmlFor={id}>{format ? format(value) : value}</output>

@@ -200,8 +200,11 @@ export function App() {
               { value: 'system', label: '', icon: 'system', title: t('theme.system') },
             ]}
           />
-          <button type="button" className="btn btn-ghost" onClick={() => setLang(lang === 'zh' ? 'en' : 'zh')}>
-            <Icon name="globe" size={14} /> {t('lang.switch')}
+          <button type="button" className="btn btn-ghost" onClick={() => setLang(lang === 'zh' ? 'en' : 'zh')} aria-label={t('lang.switch')}>
+            <Icon name="globe" size={14} /> <span className="lang-long">{t('lang.switch')}</span>
+            <span className="lang-short" aria-hidden="true">
+              {t('lang.short')}
+            </span>
           </button>
           <a className="btn btn-ghost repo-link" href={REPO_URL} target="_blank" rel="noreferrer" title={REPO_URL} aria-label={`${t('nav.source')} · GitHub`}>
             <Icon name="code" size={14} /> <span>{t('nav.source')}</span>
@@ -221,7 +224,7 @@ export function App() {
                 <input type="range" min={2} max={20} value={options.pixelSize} onChange={(e) => update({ pixelSize: Number(e.target.value) })} />
                 <output>×{options.pixelSize}</output>
               </label>
-              <Toggle className="toggle-compact" label={t('bg.transparentQuick')} checked={transparent} onChange={setTransparentBg} />
+              {wide && <Toggle className="toggle-compact" label={t('bg.transparentQuick')} checked={transparent} onChange={setTransparentBg} />}
               {scene && (
                 <span className="dims">
                   {t('canvas.size')} {scene.width}×{scene.height} → PNG {scene.width * exportScale}×{scene.height * exportScale}
@@ -229,6 +232,7 @@ export function App() {
               )}
             </div>
             <div className="actions">
+              {!wide && <Toggle className="toggle-compact" label={t('bg.transparentShort')} checked={transparent} onChange={setTransparentBg} />}
               <button type="button" className="btn btn-primary" onClick={downloadPng} disabled={!scene}>
                 <Icon name="download" size={14} /> {t('action.png')}
               </button>
@@ -264,18 +268,18 @@ export function App() {
           <Controls
             {...controlProps}
             sections={wide ? ['font', 'sign', 'mascot', 'background', 'canvas', 'embed'] : ALL_SECTIONS}
-            layout={wide ? 'tabs' : 'stack'}
+            layout="tabs"
           />
         </aside>
       </main>
 
       <footer className="footer">
         <span className="footer-repo">
-          <Icon name="code" size={12} /> {t('footer.source')}{' '}
+          <Icon name="code" size={12} /> <span className="footer-label">{t('footer.source')}</span>
           <a href={REPO_URL} target="_blank" rel="noreferrer">
             {REPO_URL}
-          </a>{' '}
-          · MIT
+          </a>
+          <span className="footer-label">· MIT</span>
         </span>
         <span>{t('footer.made')}</span>
         <span>{t('footer.fonts')}</span>
