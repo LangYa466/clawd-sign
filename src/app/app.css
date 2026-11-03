@@ -865,6 +865,75 @@ html.is-embed #root,
   place-items: center;
 }
 
+/* ── Swipeable rows: edge fades + arrows show there is more ───────────── */
+.scroll-row {
+  --fade-bg: var(--bg);
+  position: relative;
+  min-width: 0;
+}
+
+.scroll-row::before,
+.scroll-row::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  width: 44px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.scroll-row::before {
+  left: 0;
+  background: linear-gradient(to right, var(--fade-bg) 30%, transparent);
+}
+
+.scroll-row::after {
+  right: 0;
+  background: linear-gradient(to left, var(--fade-bg) 30%, transparent);
+}
+
+.scroll-row.more-left::before,
+.scroll-row.more-right::after {
+  opacity: 1;
+}
+
+.scroll-hint {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 2px solid var(--border-strong);
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 2px 0 var(--border-strong);
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+.scroll-hint-left {
+  left: 2px;
+}
+
+.scroll-hint-right {
+  right: 2px;
+}
+
+.scroll-hint-left svg {
+  transform: rotate(90deg);
+}
+
+.scroll-hint-right svg {
+  transform: rotate(-90deg);
+}
+
 /* ── Tabs (desktop settings panel) ───────────────────────────────────── */
 .controls-tabs {
   display: flex;
@@ -877,6 +946,11 @@ html.is-embed #root,
   border-radius: 14px;
 }
 
+.controls-tabs > .scroll-row {
+  --fade-bg: var(--surface-2);
+  border-bottom: 2px solid var(--border);
+}
+
 .tabs {
   display: grid;
   grid-auto-flow: column;
@@ -884,7 +958,6 @@ html.is-embed #root,
   gap: 2px;
   padding: 6px;
   background: var(--surface-2);
-  border-bottom: 2px solid var(--border);
 }
 
 .tab {

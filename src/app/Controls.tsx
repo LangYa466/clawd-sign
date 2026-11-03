@@ -14,7 +14,7 @@ import { shade } from './color';
 import { EXAMPLES, type Dict, type Key, type Lang } from './i18n';
 import { REPO_URL } from './constants';
 import { Icon } from './icons';
-import { ColorInput, Field, Section, Segmented, Select, Slider, Toggle } from './ui';
+import { ColorInput, Field, ScrollRow, Section, Segmented, Select, Slider, Toggle } from './ui';
 
 export type Update = (patch: Partial<SignOptions> | ((o: SignOptions) => Partial<SignOptions>)) => void;
 
@@ -382,9 +382,10 @@ export function Controls({ options: o, update, palette, t, lang, toast, exportSc
     const move = (dir: number) => setTab(sections[(sections.indexOf(active) + dir + sections.length) % sections.length]);
     return (
       <div className="controls controls-tabs">
-        <div
+        <ScrollRow
           className="tabs"
           role="tablist"
+          keepInView={`${baseId}-tab-${active}`}
           aria-label={t('sec.settings')}
           onKeyDown={(e) => {
             if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
@@ -408,7 +409,7 @@ export function Controls({ options: o, update, palette, t, lang, toast, exportSc
               {t(`tab.${id}` as Key)}
             </button>
           ))}
-        </div>
+        </ScrollRow>
         <div className="tab-panel section-body" role="tabpanel" id={`${baseId}-panel`} aria-labelledby={`${baseId}-tab-${active}`} key={active}>
           {bodies[active]}
         </div>

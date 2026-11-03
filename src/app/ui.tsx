@@ -1,4 +1,13 @@
-import { useEffect, useId, useState, useSyncExternalStore, type ReactNode } from 'react';
+import {
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type HTMLAttributes,
+  type ReactNode,
+} from 'react';
 import { Icon, type IconName } from './icons';
 
 /** True while the media query matches (re-renders on change). */
@@ -11,6 +20,78 @@ export function useMediaQuery(query: string): boolean {
     },
     () => window.matchMedia(query).matches,
     () => false,
+  );
+}
+
+/**
+ * A horizontally scrollable row that shows it can be swiped: the edge with hidden content
+ * fades out and gets a small arrow button. Arrows disappear once that end is reached.
+ */
+export function ScrollRow({
+  className,
+  children,
+  keepInView,
+  ...rest
+}: HTMLAttributes<HTMLDivElement> & {
+  className: string;
+  /** id of a child to scroll into view whenever it changes (e.g. the selected tab). */
+  keepInView?: string;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [edges, setEdges] = useState({ left: false, right: false });
+
+  const measure = () => {
+    const el = ref.current;
+    if (!el) return;
+    const left = el.scrollLeft > 2;
+    const right = el.scrollLeft < el.scrollWidth - el.clientWidth - 2;
+    setEdges((prev) => (prev.left === left && prev.right === right ? prev : { left, right }));
+  };
+
+  // Content can change size without the row resizing (language switch…), so re-measure every render.
+  useLayoutEffect(measure);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.addEventListener('scroll', measure, { passive: true });
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => {
+      el.removeEventListener('scroll', measure);
+      ro.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    const row = ref.current;
+    const item = keepInView ? document.getElementById(keepInView) : null;
+    if (!row || !item || row.scrollWidth <= row.clientWidth) return;
+    const r = row.getBoundingClientRect();
+    const i = item.getBoundingClientRect();
+    const pad = 36; // leave room for the arrow
+    if (i.left < r.left + pad) row.scrollBy({ left: i.left - r.left - pad, behavior: 'smooth' });
+    else if (i.right > r.right - pad) row.scrollBy({ left: i.right - r.right + pad, behavior: 'smooth' });
+  }, [keepInView]);
+
+  const page = (dir: number) => ref.current?.scrollBy({ left: dir * ref.current.clientWidth * 0.7, behavior: 'smooth' });
+
+  return (
+    <div className={`scroll-row${edges.left ? ' more-left' : ''}${edges.right ? ' more-right' : ''}`}>
+      <div ref={ref} className={className} {...rest}>
+        {children}
+      </div>
+      {edges.left && (
+        <button type="button" className="scroll-hint scroll-hint-left" tabIndex={-1} aria-hidden="true" onClick={() => page(-1)}>
+          <Icon name="chevron" size={12} />
+        </button>
+      )}
+      {edges.right && (
+        <button type="button" className="scroll-hint scroll-hint-right" tabIndex={-1} aria-hidden="true" onClick={() => page(1)}>
+          <Icon name="chevron" size={12} />
+        </button>
+      )}
+    </div>
   );
 }
 

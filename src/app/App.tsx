@@ -19,7 +19,7 @@ import { DICTS, detectLang, type Key, type Lang } from './i18n';
 import { Icon } from './icons';
 import { Logo } from './Logo';
 import { decodeHash, encodeHash, loadPrefs, loadSaved, reactSnippet, save, savePrefs, shareableOptions } from './state';
-import { Segmented, Toggle, useMediaQuery } from './ui';
+import { ScrollRow, Segmented, Toggle, useMediaQuery } from './ui';
 
 function initialState() {
   const shared = decodeHash(location.hash);
@@ -231,7 +231,7 @@ export function App() {
                 </span>
               )}
             </div>
-            <div className="actions">
+            <ScrollRow className="actions">
               {!wide && <Toggle className="toggle-compact" label={t('bg.transparentShort')} checked={transparent} onChange={setTransparentBg} />}
               <button type="button" className="btn btn-primary" onClick={downloadPng} disabled={!scene}>
                 <Icon name="download" size={14} /> {t('action.png')}
@@ -252,7 +252,7 @@ export function App() {
               <button type="button" className="btn btn-ghost" onClick={reset}>
                 <Icon name="reset" size={14} /> {t('action.reset')}
               </button>
-            </div>
+            </ScrollRow>
           </section>
 
           {/* Desktop: the most-used settings fill the space under the preview. */}
