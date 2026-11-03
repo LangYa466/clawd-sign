@@ -55,9 +55,19 @@ export function Slider({
   );
 }
 
-export function Toggle({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
+export function Toggle({
+  label,
+  checked,
+  onChange,
+  className,
+}: {
+  label: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  className?: string;
+}) {
   return (
-    <button type="button" role="switch" aria-checked={checked} className="toggle" onClick={() => onChange(!checked)}>
+    <button type="button" role="switch" aria-checked={checked} className={`toggle${className ? ` ${className}` : ''}`} onClick={() => onChange(!checked)}>
       <span className="toggle-label">{label}</span>
       <span className="toggle-track" aria-hidden="true">
         <span className="toggle-thumb" />

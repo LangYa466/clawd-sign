@@ -105,6 +105,7 @@ export async function buildScene(opts: SignOptions, theme: ResolvedTheme): Promi
     for (let x = 0; x < signW; x++) {
       if (!inRounded(x, y, signW, signH, radius)) continue;
       const inner = border === 0 || inRounded(x - border, y - border, signW - 2 * border, signH - 2 * border, innerR);
+      if (inner && opts.transparentSign) continue;
       fig.set(sx + x, sy + y, inner ? fill : edge);
     }
   }

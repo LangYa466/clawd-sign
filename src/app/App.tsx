@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ClawdSign,
   DEFAULT_OPTIONS,
@@ -19,7 +19,7 @@ import { DICTS, detectLang, type Key, type Lang } from './i18n';
 import { Icon } from './icons';
 import { Logo } from './Logo';
 import { decodeHash, encodeHash, loadPrefs, loadSaved, reactSnippet, save, savePrefs, shareableOptions } from './state';
-import { Segmented } from './ui';
+import { Segmented, Toggle } from './ui';
 
 function initialState() {
   const shared = decodeHash(location.hash);
@@ -165,6 +165,17 @@ export function App() {
 
   const transparent = options.background.type === 'transparent';
 
+  // One-click transparent background that remembers what it replaced.
+  const previousBg = useRef<BackgroundSpec>({ type: 'theme' });
+  function setTransparentBg(on: boolean) {
+    if (on) {
+      if (options.background.type !== 'transparent') previousBg.current = options.background;
+      update({ background: { type: 'transparent' } });
+    } else {
+      update({ background: previousBg.current.type === 'transparent' ? { type: 'theme' } : previousBg.current });
+    }
+  }
+
   return (
     <div className="app">
       <header className="topbar">
@@ -206,6 +217,7 @@ export function App() {
               <input type="range" min={2} max={20} value={options.pixelSize} onChange={(e) => update({ pixelSize: Number(e.target.value) })} />
               <output>×{options.pixelSize}</output>
             </label>
+            <Toggle className="toggle-compact" label={t('bg.transparentQuick')} checked={transparent} onChange={setTransparentBg} />
             {scene && (
               <span className="dims">
                 {t('canvas.size')} {scene.width}×{scene.height} → PNG {scene.width * exportScale}×{scene.height * exportScale}

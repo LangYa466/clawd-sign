@@ -79,6 +79,7 @@ export function sanitizeOptions(input: unknown): SignOptions {
     borderWidth: num(o.borderWidth, 0, 8, d.borderWidth),
     cornerRadius: num(o.cornerRadius, 0, 12, d.cornerRadius),
     minWidth: num(o.minWidth, 0, 400, d.minWidth),
+    transparentSign: typeof o.transparentSign === 'boolean' ? o.transparentSign : d.transparentSign,
     showMascot: typeof o.showMascot === 'boolean' ? o.showMascot : d.showMascot,
     mascotScale: num(o.mascotScale, 1, 4, d.mascotScale),
     eyes: oneOf(o.eyes, ['square', 'tall', 'happy', 'closed', 'wink', 'dizzy'] as const, d.eyes),

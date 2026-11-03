@@ -60,6 +60,7 @@ const zh = {
   'sign.paddingX': '左右留白',
   'sign.paddingY': '上下留白',
   'sign.minWidth': '最小宽度',
+  'sign.transparent': '牌子透明底',
 
   'mascot.show': '显示吉祥物',
   'mascot.body': '身体颜色',
@@ -82,6 +83,7 @@ const zh = {
   'bg.type': '类型',
   'bg.theme': '主题',
   'bg.transparent': '透明',
+  'bg.transparentQuick': '透明背景',
   'bg.color': '纯色',
   'bg.gradient': '渐变',
   'bg.pattern': '图案',
@@ -206,6 +208,7 @@ const en: Dict = {
   'sign.paddingX': 'Padding X',
   'sign.paddingY': 'Padding Y',
   'sign.minWidth': 'Min width',
+  'sign.transparent': 'Transparent sign',
 
   'mascot.show': 'Show mascot',
   'mascot.body': 'Body colour',
@@ -228,6 +231,7 @@ const en: Dict = {
   'bg.type': 'Type',
   'bg.theme': 'Theme',
   'bg.transparent': 'None',
+  'bg.transparentQuick': 'Transparent background',
   'bg.color': 'Solid',
   'bg.gradient': 'Gradient',
   'bg.pattern': 'Pattern',

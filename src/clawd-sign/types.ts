@@ -58,6 +58,8 @@ export interface SignOptions {
   cornerRadius: number;
   /** Minimum sign width in pixels (0 = just wide enough for the hands). */
   minWidth: number;
+  /** Leave the inside of the sign unpainted so the background shows through (border and text stay). */
+  transparentSign: boolean;
 
   showMascot: boolean;
   /** Mascot pixel size relative to the text pixels (1–4). */
@@ -95,6 +97,7 @@ export const DEFAULT_OPTIONS: SignOptions = {
   borderWidth: 1,
   cornerRadius: 1,
   minWidth: 0,
+  transparentSign: false,
 
   showMascot: true,
   mascotScale: 1,

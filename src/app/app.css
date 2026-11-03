@@ -223,6 +223,12 @@ a {
   font-variant-numeric: tabular-nums;
 }
 
+.toggle-compact {
+  padding: 5px 9px;
+  background: transparent;
+  color: var(--text-2);
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;
@@ -892,7 +898,7 @@ html.is-embed #root,
 
   .stage {
     min-height: 0;
-    height: min(32vh, 280px);
+    height: min(30vh, 260px);
     padding: 14px;
   }
 
@@ -901,7 +907,9 @@ html.is-embed #root,
     width: auto !important;
   }
 
-  .preview-bar {
+  /* Zoom and size are moot when the sign is fitted to the screen; keep the transparency switch. */
+  .preview-bar .zoom,
+  .preview-bar .dims {
     display: none;
   }
 

@@ -220,8 +220,11 @@ export function Controls({ options: o, update, palette, t, lang, toast, exportSc
       </Section>
 
       <Section title={t('sec.sign')}>
+        <div className="toggles">
+          <Toggle label={t('sign.transparent')} checked={o.transparentSign} onChange={(transparentSign) => update({ transparentSign })} />
+        </div>
         <div className="grid-2">
-          <ColorInput {...colorProps('signFill', 'sign.fill')} />
+          {!o.transparentSign && <ColorInput {...colorProps('signFill', 'sign.fill')} />}
           <ColorInput {...colorProps('signBorder', 'sign.border')} />
           <ColorInput {...colorProps('text', 'sign.text')} />
         </div>
