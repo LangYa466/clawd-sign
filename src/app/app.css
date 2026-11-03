@@ -173,6 +173,8 @@ a {
 
 .stage {
   display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   place-items: center;
   min-height: 380px;
   padding: 28px;
@@ -188,8 +190,11 @@ a {
   background-size: 16px 16px;
 }
 
+/* Fit inside the stage (keeping the aspect ratio) but never exceed the chosen zoom. */
 .stage-sign {
+  width: auto !important;
   max-width: 100%;
+  max-height: 100%;
   height: auto;
   image-rendering: pixelated;
 }
@@ -237,39 +242,6 @@ a {
 
 .actions-spacer {
   flex: 1;
-}
-
-.repo-card {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
-  border: 2px dashed var(--border-strong);
-  border-radius: 12px;
-  background: var(--surface);
-  color: var(--text-2);
-  font-size: 13px;
-  text-decoration: none;
-  transition: background-color 0.12s, border-color 0.12s;
-}
-
-.repo-card:hover {
-  border-color: var(--accent);
-  background: var(--surface-2);
-}
-
-.repo-card-label {
-  flex: none;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.repo-card-url {
-  flex: 1;
-  min-width: 0;
-  color: var(--accent-strong);
-  font-family: var(--mono);
-  overflow-wrap: anywhere;
 }
 
 /* ── Buttons ────────────────────────────────────────────────────────────── */
@@ -397,6 +369,13 @@ a {
 
 .section > summary::-webkit-details-marker {
   display: none;
+}
+
+.section-static .section-head {
+  margin: 0;
+  padding: 14px 16px 12px;
+  font: inherit;
+  line-height: 1.2;
 }
 
 .section-title {
@@ -823,6 +802,18 @@ input[type='range']::-moz-range-thumb {
 }
 
 /* ── Footer & toast ─────────────────────────────────────────────────────── */
+.footer-repo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-2);
+}
+
+.footer-repo a {
+  color: var(--accent-strong);
+  font-family: var(--mono);
+}
+
 .footer {
   display: flex;
   flex-wrap: wrap;
@@ -880,10 +871,182 @@ html.is-embed #root,
   place-items: center;
 }
 
+/* ── Tabs (desktop settings panel) ───────────────────────────────────── */
+.controls-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 14px;
+}
+
+.tabs {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 2px;
+  padding: 6px;
+  background: var(--surface-2);
+  border-bottom: 2px solid var(--border);
+}
+
+.tab {
+  min-width: 0;
+  padding: 8px 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-2);
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.tab:hover {
+  color: var(--text);
+  background: var(--surface-3);
+}
+
+.tab[aria-selected='true'] {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 0 0 2px var(--accent) inset;
+}
+
+.controls-tabs .tab-panel {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 16px;
+  align-content: start;
+}
+
+/* ── Desktop: one-screen workspace ──────────────────────────────────── */
+@media (min-width: 961px) {
+  .app {
+    max-width: 1680px;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 640px;
+  }
+
+  .topbar {
+    flex: none;
+    padding: 14px 0 12px;
+  }
+
+  .layout {
+    flex: 1;
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr) clamp(380px, 28vw, 460px);
+    align-items: stretch;
+    gap: 20px;
+  }
+
+  .workspace {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .preview {
+    position: static;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .stage {
+    flex: 1;
+    min-height: 180px;
+    padding: 20px;
+  }
+
+  .quick {
+    flex: none;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .quick .controls,
+  .quick .section {
+    height: 100%;
+  }
+
+  .quick .section-body {
+    gap: 10px;
+  }
+
+  .quick .text-input {
+    min-height: 0;
+  }
+
+  .quick .chips {
+    max-height: 100px;
+    overflow-y: auto;
+  }
+
+  .quick .presets {
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    gap: 6px;
+  }
+
+  .quick .preset {
+    padding: 6px 4px;
+  }
+
+  .quick .preset-swatch {
+    height: 30px;
+  }
+
+  .quick .preset-swatch span {
+    top: 4px;
+    height: 11px;
+  }
+
+  .quick .preset-swatch i {
+    top: 17px;
+    height: 8px;
+  }
+
+  .panel {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .panel .controls-tabs {
+    flex: 1;
+  }
+
+  .footer {
+    flex: none;
+    padding: 10px 0 12px;
+  }
+}
+
 /* ── Responsive ─────────────────────────────────────────────────────────── */
 @media (max-width: 960px) {
   .layout {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Let the preview stick relative to the whole page, not this wrapper. */
+  .workspace {
+    display: contents;
   }
 
   /* Keep the sign in view while editing below it. */
@@ -902,10 +1065,6 @@ html.is-embed #root,
     padding: 14px;
   }
 
-  .stage-sign {
-    max-height: 100%;
-    width: auto !important;
-  }
 
   /* Zoom and size are moot when the sign is fitted to the screen; keep the transparency switch. */
   .preview-bar .zoom,
@@ -926,11 +1085,6 @@ html.is-embed #root,
   }
 
   .actions-spacer {
-    display: none;
-  }
-
-  /* The sticky phone preview stays compact; the footer carries the link there. */
-  .repo-card {
     display: none;
   }
 }

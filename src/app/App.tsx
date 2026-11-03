@@ -14,12 +14,12 @@ import {
 } from '../clawd-sign';
 import { shade } from './color';
 import { REPO_URL } from './constants';
-import { Controls, type Update } from './Controls';
+import { ALL_SECTIONS, Controls, type Update } from './Controls';
 import { DICTS, detectLang, type Key, type Lang } from './i18n';
 import { Icon } from './icons';
 import { Logo } from './Logo';
 import { decodeHash, encodeHash, loadPrefs, loadSaved, reactSnippet, save, savePrefs, shareableOptions } from './state';
-import { Segmented, Toggle } from './ui';
+import { Segmented, Toggle, useMediaQuery } from './ui';
 
 function initialState() {
   const shared = decodeHash(location.hash);
@@ -164,6 +164,9 @@ export function App() {
   }, [options, theme, scene]);
 
   const transparent = options.background.type === 'transparent';
+  // Matches the CSS breakpoint: side-by-side workspace above it, stacked sections below.
+  const wide = useMediaQuery('(min-width: 961px)');
+  const controlProps = { options, update, palette, t, lang, toast, exportScale, setExportScale, embed };
 
   // One-click transparent background that remembers what it replaced.
   const previousBg = useRef<BackgroundSpec>({ type: 'theme' });
@@ -207,77 +210,75 @@ export function App() {
       </header>
 
       <main className="layout">
-        <section className="preview" aria-label="Preview">
-          <div className={`stage${transparent ? ' stage-checker' : ''}`}>
-            <ClawdSign {...options} theme={theme} onSceneChange={setScene} className="stage-sign" />
-          </div>
-          <div className="preview-bar">
-            <label className="zoom">
-              <span>{t('canvas.zoom')}</span>
-              <input type="range" min={2} max={20} value={options.pixelSize} onChange={(e) => update({ pixelSize: Number(e.target.value) })} />
-              <output>×{options.pixelSize}</output>
-            </label>
-            <Toggle className="toggle-compact" label={t('bg.transparentQuick')} checked={transparent} onChange={setTransparentBg} />
-            {scene && (
-              <span className="dims">
-                {t('canvas.size')} {scene.width}×{scene.height} → PNG {scene.width * exportScale}×{scene.height * exportScale}
-              </span>
-            )}
-          </div>
-          <div className="actions">
-            <button type="button" className="btn btn-primary" onClick={downloadPng} disabled={!scene}>
-              <Icon name="download" size={14} /> {t('action.png')}
-            </button>
-            <button type="button" className="btn" onClick={downloadSvg} disabled={!scene}>
-              <Icon name="download" size={14} /> {t('action.svg')}
-            </button>
-            <button type="button" className="btn" onClick={copyImage} disabled={!scene}>
-              <Icon name="copy" size={14} /> {t('action.copy')}
-            </button>
-            <button type="button" className="btn" onClick={copyLink}>
-              <Icon name="link" size={14} /> {t('action.link')}
-            </button>
-            <span className="actions-spacer" />
-            <button type="button" className="btn btn-ghost" onClick={shuffle}>
-              <Icon name="dice" size={14} /> {t('action.random')}
-            </button>
-            <button type="button" className="btn btn-ghost" onClick={reset}>
-              <Icon name="reset" size={14} /> {t('action.reset')}
-            </button>
-          </div>
-          <a className="repo-card" href={REPO_URL} target="_blank" rel="noreferrer">
-            <Icon name="code" size={16} />
-            <span className="repo-card-label">{t('repo.label')}</span>
-            <span className="repo-card-url">{REPO_URL}</span>
-            <span aria-hidden="true">↗</span>
-          </a>
-        </section>
+        <div className="workspace">
+          <section className="preview" aria-label="Preview">
+            <div className={`stage${transparent ? ' stage-checker' : ''}`}>
+              <ClawdSign {...options} theme={theme} onSceneChange={setScene} className="stage-sign" />
+            </div>
+            <div className="preview-bar">
+              <label className="zoom">
+                <span>{t('canvas.zoom')}</span>
+                <input type="range" min={2} max={20} value={options.pixelSize} onChange={(e) => update({ pixelSize: Number(e.target.value) })} />
+                <output>×{options.pixelSize}</output>
+              </label>
+              <Toggle className="toggle-compact" label={t('bg.transparentQuick')} checked={transparent} onChange={setTransparentBg} />
+              {scene && (
+                <span className="dims">
+                  {t('canvas.size')} {scene.width}×{scene.height} → PNG {scene.width * exportScale}×{scene.height * exportScale}
+                </span>
+              )}
+            </div>
+            <div className="actions">
+              <button type="button" className="btn btn-primary" onClick={downloadPng} disabled={!scene}>
+                <Icon name="download" size={14} /> {t('action.png')}
+              </button>
+              <button type="button" className="btn" onClick={downloadSvg} disabled={!scene}>
+                <Icon name="download" size={14} /> {t('action.svg')}
+              </button>
+              <button type="button" className="btn" onClick={copyImage} disabled={!scene}>
+                <Icon name="copy" size={14} /> {t('action.copy')}
+              </button>
+              <button type="button" className="btn" onClick={copyLink}>
+                <Icon name="link" size={14} /> {t('action.link')}
+              </button>
+              <span className="actions-spacer" />
+              <button type="button" className="btn btn-ghost" onClick={shuffle}>
+                <Icon name="dice" size={14} /> {t('action.random')}
+              </button>
+              <button type="button" className="btn btn-ghost" onClick={reset}>
+                <Icon name="reset" size={14} /> {t('action.reset')}
+              </button>
+            </div>
+          </section>
+
+          {/* Desktop: the most-used settings fill the space under the preview. */}
+          {wide && (
+            <div className="quick">
+              <Controls {...controlProps} sections={['text']} layout="cards" />
+              <Controls {...controlProps} sections={['palette']} layout="cards" />
+            </div>
+          )}
+        </div>
 
         <aside className="panel">
           <Controls
-            options={options}
-            update={update}
-            palette={palette}
-            t={t}
-            lang={lang}
-            toast={toast}
-            exportScale={exportScale}
-            setExportScale={setExportScale}
-            embed={embed}
+            {...controlProps}
+            sections={wide ? ['font', 'sign', 'mascot', 'background', 'canvas', 'embed'] : ALL_SECTIONS}
+            layout={wide ? 'tabs' : 'stack'}
           />
         </aside>
       </main>
 
       <footer className="footer">
-        <span>{t('footer.made')}</span>
-        <span>{t('footer.fonts')}</span>
-        <span>
-          {t('footer.source')}{' '}
+        <span className="footer-repo">
+          <Icon name="code" size={12} /> {t('footer.source')}{' '}
           <a href={REPO_URL} target="_blank" rel="noreferrer">
             {REPO_URL}
           </a>{' '}
           · MIT
         </span>
+        <span>{t('footer.made')}</span>
+        <span>{t('footer.fonts')}</span>
       </footer>
 
       <div className="toast-region" role="status" aria-live="polite">

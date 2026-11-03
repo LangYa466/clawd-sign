@@ -1,7 +1,40 @@
-import { useEffect, useId, useState, type ReactNode } from 'react';
+import { useEffect, useId, useState, useSyncExternalStore, type ReactNode } from 'react';
 import { Icon, type IconName } from './icons';
 
-export function Section({ title, children, defaultOpen = true }: { title: string; children: ReactNode; defaultOpen?: boolean }) {
+/** True while the media query matches (re-renders on change). */
+export function useMediaQuery(query: string): boolean {
+  return useSyncExternalStore(
+    (cb) => {
+      const mq = window.matchMedia(query);
+      mq.addEventListener('change', cb);
+      return () => mq.removeEventListener('change', cb);
+    },
+    () => window.matchMedia(query).matches,
+    () => false,
+  );
+}
+
+export function Section({
+  title,
+  children,
+  defaultOpen = true,
+  collapsible = true,
+}: {
+  title: string;
+  children: ReactNode;
+  defaultOpen?: boolean;
+  collapsible?: boolean;
+}) {
+  if (!collapsible) {
+    return (
+      <section className="section section-static">
+        <h2 className="section-head">
+          <span className="section-title">{title}</span>
+        </h2>
+        <div className="section-body">{children}</div>
+      </section>
+    );
+  }
   return (
     <details className="section" open={defaultOpen}>
       <summary>

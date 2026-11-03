@@ -1,4 +1,4 @@
-import { useId, useRef } from 'react';
+import { useId, useRef, useState, type ReactNode } from 'react';
 import {
   PALETTE_PRESETS,
   type Aspect,
@@ -28,12 +28,21 @@ interface Props {
   exportScale: number;
   setExportScale: (n: number) => void;
   embed: { iframe: string; react: string; url: string };
+  /** Which groups of settings to show, in order. */
+  sections: SectionId[];
+  /** `stack`: collapsible sections (phones) · `cards`: static cards · `tabs`: one group at a time. */
+  layout: 'stack' | 'cards' | 'tabs';
 }
+
+export type SectionId = 'text' | 'font' | 'palette' | 'sign' | 'mascot' | 'background' | 'canvas' | 'embed';
+export const ALL_SECTIONS: SectionId[] = ['text', 'font', 'palette', 'sign', 'mascot', 'background', 'canvas', 'embed'];
 
 let uploadCounter = 0;
 
-export function Controls({ options: o, update, palette, t, lang, toast, exportScale, setExportScale, embed }: Props) {
+export function Controls({ options: o, update, palette, t, lang, toast, exportScale, setExportScale, embed, sections, layout }: Props) {
   const textId = useId();
+  const baseId = useId();
+  const [tab, setTab] = useState<SectionId>(sections[0]);
   const fontInput = useRef<HTMLInputElement>(null);
   const imageInput = useRef<HTMLInputElement>(null);
 
@@ -101,263 +110,319 @@ export function Controls({ options: o, update, palette, t, lang, toast, exportSc
           ? t('font.hint.custom')
           : t('font.hint.fusion');
 
-  return (
-    <div className="controls">
-      <Section title={t('sec.text')}>
-        <textarea
-          id={textId}
-          className="text-input"
-          value={o.text}
-          placeholder={t('text.placeholder')}
-          rows={Math.min(6, Math.max(2, o.text.split('\n').length))}
-          onChange={(e) => update({ text: e.target.value })}
-          aria-label={t('sec.text')}
-        />
-        <div className="chips" aria-label={t('text.examples')}>
-          {EXAMPLES.map((ex) => (
-            <button key={ex} type="button" className="chip" aria-pressed={o.text === ex} onClick={() => update({ text: ex })}>
-              {ex.replace('\n', ' ⏎ ')}
-            </button>
-          ))}
+  const bodies: Record<SectionId, ReactNode> = {
+    text: (
+      <>
+      <textarea
+        id={textId}
+        className="text-input"
+        value={o.text}
+        placeholder={t('text.placeholder')}
+        rows={Math.min(6, Math.max(2, o.text.split('\n').length))}
+        onChange={(e) => update({ text: e.target.value })}
+        aria-label={t('sec.text')}
+      />
+      <div className="chips" aria-label={t('text.examples')}>
+        {EXAMPLES.map((ex) => (
+          <button key={ex} type="button" className="chip" aria-pressed={o.text === ex} onClick={() => update({ text: ex })}>
+            {ex.replace('\n', ' ⏎ ')}
+          </button>
+        ))}
+      </div>
+      </>
+    ),
+    font: (
+      <>
+      <Select<FontId>
+        label={t('font.family')}
+        value={o.font}
+        onChange={(font) => update(font === 'fusion-8' ? { font, bold: false } : { font })}
+        hint={fontHint}
+        options={[
+          { value: 'fusion-12', label: t('font.fusion12') },
+          { value: 'fusion-10', label: t('font.fusion10') },
+          { value: 'fusion-8', label: t('font.fusion8') },
+          { value: 'unifont', label: t('font.unifont') },
+          { value: 'system', label: t('font.system') },
+          { value: 'custom', label: t('font.custom') },
+        ]}
+      />
+      {o.font === 'custom' && (
+        <div className="row">
+          <button type="button" className="btn" onClick={() => fontInput.current?.click()}>
+            <Icon name="upload" size={14} /> {t('font.upload')}
+          </button>
+          <input
+            ref={fontInput}
+            type="file"
+            accept=".ttf,.otf,.woff,.woff2,font/*"
+            hidden
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) onFontFile(f);
+              e.target.value = '';
+            }}
+          />
+          <input
+            className="text-field"
+            placeholder={t('font.localName')}
+            aria-label={t('font.localName')}
+            value={o.customFontFamily.startsWith('Clawd Upload') ? '' : o.customFontFamily}
+            onChange={(e) => update({ customFontFamily: e.target.value })}
+          />
         </div>
-      </Section>
-
-      <Section title={t('sec.font')}>
-        <Select<FontId>
-          label={t('font.family')}
-          value={o.font}
-          onChange={(font) => update(font === 'fusion-8' ? { font, bold: false } : { font })}
-          hint={fontHint}
-          options={[
-            { value: 'fusion-12', label: t('font.fusion12') },
-            { value: 'fusion-10', label: t('font.fusion10') },
-            { value: 'fusion-8', label: t('font.fusion8') },
-            { value: 'unifont', label: t('font.unifont') },
-            { value: 'system', label: t('font.system') },
-            { value: 'custom', label: t('font.custom') },
-          ]}
+      )}
+      {(o.font === 'system' || o.font === 'custom') && (
+        <>
+          <Slider label={t('font.size')} value={o.customFontSize} min={8} max={48} onChange={(customFontSize) => update({ customFontSize })} />
+          <Slider label={t('font.threshold')} value={o.threshold} min={20} max={240} onChange={(threshold) => update({ threshold })} />
+        </>
+      )}
+      {o.font.startsWith('fusion') && (
+        <Field label={t('font.region')}>
+          <Segmented<CjkRegion>
+            label={t('font.region')}
+            value={o.cjkRegion}
+            onChange={(cjkRegion) => update({ cjkRegion })}
+            options={(['auto', 'zh_hans', 'zh_hant', 'ja', 'ko'] as const).map((v) => ({ value: v, label: t(`region.${v}` as Key) }))}
+          />
+        </Field>
+      )}
+      <Slider label={t('font.scale')} value={o.fontScale} min={1} max={4} onChange={(fontScale) => update({ fontScale })} format={(v) => `×${v}`} />
+      <Field label={t('font.align')}>
+        <Segmented
+          label={t('font.align')}
+          value={o.align}
+          onChange={(align) => update({ align })}
+          options={(['left', 'center', 'right'] as const).map((v) => ({ value: v, label: t(`align.${v}` as Key) }))}
         />
-        {o.font === 'custom' && (
-          <div className="row">
-            <button type="button" className="btn" onClick={() => fontInput.current?.click()}>
-              <Icon name="upload" size={14} /> {t('font.upload')}
+      </Field>
+      <Slider label={t('font.letterSpacing')} value={o.letterSpacing} min={-2} max={8} onChange={(letterSpacing) => update({ letterSpacing })} />
+      <Slider label={t('font.lineSpacing')} value={o.lineSpacing} min={-4} max={16} onChange={(lineSpacing) => update({ lineSpacing })} />
+      <div className="toggles">
+        <Toggle label={t('font.bold')} checked={o.bold} onChange={(bold) => update({ bold })} />
+        <Toggle label={t('font.colorEmoji')} checked={o.colorEmoji} onChange={(colorEmoji) => update({ colorEmoji })} />
+      </div>
+      </>
+    ),
+    palette: (
+      <>
+      <div className="presets">
+        {PALETTE_PRESETS.map((p) => {
+          const c = { ...palette, ...p.colors };
+          const active = p.id === 'theme' ? Object.keys(o.colors).length === 0 : sameColors(o.colors, p.colors);
+          return (
+            <button
+              key={p.id}
+              type="button"
+              className="preset"
+              aria-pressed={active}
+              onClick={() => update((cur) => ({ colors: { ...p.colors }, background: recolorBackground(cur.background, c.background) }))}
+            >
+              <span className="preset-swatch" style={{ background: c.background }}>
+                <span style={{ background: c.signFill, borderColor: c.signBorder }} />
+                <i style={{ background: c.body }} />
+              </span>
+              <span className="preset-name">{p.name[lang]}</span>
             </button>
+          );
+        })}
+      </div>
+      </>
+    ),
+    sign: (
+      <>
+      <div className="toggles">
+        <Toggle label={t('sign.transparent')} checked={o.transparentSign} onChange={(transparentSign) => update({ transparentSign })} />
+      </div>
+      <div className="grid-2">
+        {!o.transparentSign && <ColorInput {...colorProps('signFill', 'sign.fill')} />}
+        <ColorInput {...colorProps('signBorder', 'sign.border')} />
+        <ColorInput {...colorProps('text', 'sign.text')} />
+      </div>
+      <Slider label={t('sign.borderWidth')} value={o.borderWidth} min={0} max={4} onChange={(borderWidth) => update({ borderWidth })} />
+      <Slider label={t('sign.radius')} value={o.cornerRadius} min={0} max={8} onChange={(cornerRadius) => update({ cornerRadius })} />
+      <Slider label={t('sign.paddingX')} value={o.paddingX} min={0} max={16} onChange={(paddingX) => update({ paddingX })} />
+      <Slider label={t('sign.paddingY')} value={o.paddingY} min={0} max={16} onChange={(paddingY) => update({ paddingY })} />
+      <Slider label={t('sign.minWidth')} value={o.minWidth} min={0} max={200} onChange={(minWidth) => update({ minWidth })} />
+      </>
+    ),
+    mascot: (
+      <>
+      <div className="toggles">
+        <Toggle label={t('mascot.show')} checked={o.showMascot} onChange={(showMascot) => update({ showMascot })} />
+        <Toggle label={t('mascot.blink')} checked={o.blink} onChange={(blink) => update({ blink })} />
+      </div>
+      {o.showMascot && (
+        <>
+          <div className="grid-2">
+            <ColorInput {...colorProps('body', 'mascot.body')} />
+            <ColorInput {...colorProps('eyes', 'mascot.eyes')} />
+          </div>
+          <Field label={t('mascot.eyeStyle')}>
+            <Segmented<EyeStyle>
+              label={t('mascot.eyeStyle')}
+              value={o.eyes}
+              columns={3}
+              onChange={(eyes) => update({ eyes })}
+              options={(['square', 'tall', 'happy', 'closed', 'wink', 'dizzy'] as const).map((v) => ({ value: v, label: t(`eye.${v}` as Key) }))}
+            />
+          </Field>
+          <Field label={t('mascot.animation')}>
+            <Segmented
+              label={t('mascot.animation')}
+              value={o.animation}
+              onChange={(animation) => update({ animation })}
+              options={(['none', 'bob', 'jump', 'shake'] as const).map((v) => ({ value: v, label: t(`anim.${v}` as Key) }))}
+            />
+          </Field>
+          <Slider label={t('mascot.scale')} value={o.mascotScale} min={1} max={4} onChange={(mascotScale) => update({ mascotScale })} format={(v) => `×${v}`} />
+        </>
+      )}
+      </>
+    ),
+    background: (
+      <>
+      <Segmented<BackgroundSpec['type']>
+        label={t('bg.type')}
+        value={bg.type}
+        columns={3}
+        onChange={switchBg}
+        options={(['theme', 'transparent', 'color', 'gradient', 'pattern', 'image'] as const).map((v) => ({ value: v, label: t(`bg.${v}` as Key) }))}
+      />
+      {bg.type === 'theme' && <ColorInput {...colorProps('background', 'bg.themeColor')} />}
+      {bg.type === 'color' && <ColorInput label={t('bg.color')} value={bg.color} onChange={(color) => setBg({ ...bg, color })} />}
+      {bg.type === 'gradient' && (
+        <>
+          <div className="grid-2">
+            <ColorInput label={t('bg.from')} value={bg.from} onChange={(from) => setBg({ ...bg, from })} />
+            <ColorInput label={t('bg.to')} value={bg.to} onChange={(to) => setBg({ ...bg, to })} />
+          </div>
+          <Slider label={t('bg.angle')} value={bg.angle} min={0} max={360} step={15} onChange={(angle) => setBg({ ...bg, angle })} format={(v) => `${v}°`} />
+          <Slider label={t('bg.steps')} hint={t('bg.steps.hint')} value={bg.steps} min={0} max={24} onChange={(steps) => setBg({ ...bg, steps })} />
+        </>
+      )}
+      {bg.type === 'pattern' && (
+        <>
+          <Field label={t('bg.kind')}>
+            <Segmented<PatternKind>
+              label={t('bg.kind')}
+              value={bg.kind}
+              onChange={(kind) => setBg({ ...bg, kind })}
+              options={(['checker', 'grid', 'dots', 'stripes'] as const).map((v) => ({ value: v, label: t(`pattern.${v}` as Key) }))}
+            />
+          </Field>
+          <div className="grid-2">
+            <ColorInput label={t('bg.color1')} value={bg.color1} onChange={(color1) => setBg({ ...bg, color1 })} />
+            <ColorInput label={t('bg.color2')} value={bg.color2} onChange={(color2) => setBg({ ...bg, color2 })} />
+          </div>
+          <Slider label={t('bg.size')} value={bg.size} min={2} max={16} onChange={(size) => setBg({ ...bg, size })} />
+        </>
+      )}
+      {bg.type === 'image' && (
+        <>
+          <div className="row">
+            <button type="button" className="btn" onClick={() => imageInput.current?.click()}>
+              <Icon name="upload" size={14} /> {t('bg.upload')}
+            </button>
+            {bg.src ? <img className="thumb" src={bg.src} alt="" /> : <span className="muted">{t('bg.noImage')}</span>}
             <input
-              ref={fontInput}
+              ref={imageInput}
               type="file"
-              accept=".ttf,.otf,.woff,.woff2,font/*"
+              accept="image/*"
               hidden
               onChange={(e) => {
                 const f = e.target.files?.[0];
-                if (f) onFontFile(f);
+                if (f) onImageFile(f);
                 e.target.value = '';
               }}
             />
-            <input
-              className="text-field"
-              placeholder={t('font.localName')}
-              aria-label={t('font.localName')}
-              value={o.customFontFamily.startsWith('Clawd Upload') ? '' : o.customFontFamily}
-              onChange={(e) => update({ customFontFamily: e.target.value })}
-            />
           </div>
-        )}
-        {(o.font === 'system' || o.font === 'custom') && (
-          <>
-            <Slider label={t('font.size')} value={o.customFontSize} min={8} max={48} onChange={(customFontSize) => update({ customFontSize })} />
-            <Slider label={t('font.threshold')} value={o.threshold} min={20} max={240} onChange={(threshold) => update({ threshold })} />
-          </>
-        )}
-        {o.font.startsWith('fusion') && (
-          <Field label={t('font.region')}>
-            <Segmented<CjkRegion>
-              label={t('font.region')}
-              value={o.cjkRegion}
-              onChange={(cjkRegion) => update({ cjkRegion })}
-              options={(['auto', 'zh_hans', 'zh_hant', 'ja', 'ko'] as const).map((v) => ({ value: v, label: t(`region.${v}` as Key) }))}
-            />
-          </Field>
-        )}
-        <Slider label={t('font.scale')} value={o.fontScale} min={1} max={4} onChange={(fontScale) => update({ fontScale })} format={(v) => `×${v}`} />
-        <Field label={t('font.align')}>
-          <Segmented
-            label={t('font.align')}
-            value={o.align}
-            onChange={(align) => update({ align })}
-            options={(['left', 'center', 'right'] as const).map((v) => ({ value: v, label: t(`align.${v}` as Key) }))}
-          />
-        </Field>
-        <Slider label={t('font.letterSpacing')} value={o.letterSpacing} min={-2} max={8} onChange={(letterSpacing) => update({ letterSpacing })} />
-        <Slider label={t('font.lineSpacing')} value={o.lineSpacing} min={-4} max={16} onChange={(lineSpacing) => update({ lineSpacing })} />
-        <div className="toggles">
-          <Toggle label={t('font.bold')} checked={o.bold} onChange={(bold) => update({ bold })} />
-          <Toggle label={t('font.colorEmoji')} checked={o.colorEmoji} onChange={(colorEmoji) => update({ colorEmoji })} />
-        </div>
-      </Section>
-
-      <Section title={t('sec.palette')}>
-        <div className="presets">
-          {PALETTE_PRESETS.map((p) => {
-            const c = { ...palette, ...p.colors };
-            const active = p.id === 'theme' ? Object.keys(o.colors).length === 0 : sameColors(o.colors, p.colors);
-            return (
-              <button
-                key={p.id}
-                type="button"
-                className="preset"
-                aria-pressed={active}
-                onClick={() => update((cur) => ({ colors: { ...p.colors }, background: recolorBackground(cur.background, c.background) }))}
-              >
-                <span className="preset-swatch" style={{ background: c.background }}>
-                  <span style={{ background: c.signFill, borderColor: c.signBorder }} />
-                  <i style={{ background: c.body }} />
-                </span>
-                <span className="preset-name">{p.name[lang]}</span>
-              </button>
-            );
-          })}
-        </div>
-      </Section>
-
-      <Section title={t('sec.sign')}>
-        <div className="toggles">
-          <Toggle label={t('sign.transparent')} checked={o.transparentSign} onChange={(transparentSign) => update({ transparentSign })} />
-        </div>
-        <div className="grid-2">
-          {!o.transparentSign && <ColorInput {...colorProps('signFill', 'sign.fill')} />}
-          <ColorInput {...colorProps('signBorder', 'sign.border')} />
-          <ColorInput {...colorProps('text', 'sign.text')} />
-        </div>
-        <Slider label={t('sign.borderWidth')} value={o.borderWidth} min={0} max={4} onChange={(borderWidth) => update({ borderWidth })} />
-        <Slider label={t('sign.radius')} value={o.cornerRadius} min={0} max={8} onChange={(cornerRadius) => update({ cornerRadius })} />
-        <Slider label={t('sign.paddingX')} value={o.paddingX} min={0} max={16} onChange={(paddingX) => update({ paddingX })} />
-        <Slider label={t('sign.paddingY')} value={o.paddingY} min={0} max={16} onChange={(paddingY) => update({ paddingY })} />
-        <Slider label={t('sign.minWidth')} value={o.minWidth} min={0} max={200} onChange={(minWidth) => update({ minWidth })} />
-      </Section>
-
-      <Section title={t('sec.mascot')}>
-        <div className="toggles">
-          <Toggle label={t('mascot.show')} checked={o.showMascot} onChange={(showMascot) => update({ showMascot })} />
-          <Toggle label={t('mascot.blink')} checked={o.blink} onChange={(blink) => update({ blink })} />
-        </div>
-        {o.showMascot && (
-          <>
-            <div className="grid-2">
-              <ColorInput {...colorProps('body', 'mascot.body')} />
-              <ColorInput {...colorProps('eyes', 'mascot.eyes')} />
-            </div>
-            <Field label={t('mascot.eyeStyle')}>
-              <Segmented<EyeStyle>
-                label={t('mascot.eyeStyle')}
-                value={o.eyes}
-                columns={3}
-                onChange={(eyes) => update({ eyes })}
-                options={(['square', 'tall', 'happy', 'closed', 'wink', 'dizzy'] as const).map((v) => ({ value: v, label: t(`eye.${v}` as Key) }))}
-              />
-            </Field>
-            <Field label={t('mascot.animation')}>
-              <Segmented
-                label={t('mascot.animation')}
-                value={o.animation}
-                onChange={(animation) => update({ animation })}
-                options={(['none', 'bob', 'jump', 'shake'] as const).map((v) => ({ value: v, label: t(`anim.${v}` as Key) }))}
-              />
-            </Field>
-            <Slider label={t('mascot.scale')} value={o.mascotScale} min={1} max={4} onChange={(mascotScale) => update({ mascotScale })} format={(v) => `×${v}`} />
-          </>
-        )}
-      </Section>
-
-      <Section title={t('sec.background')}>
-        <Segmented<BackgroundSpec['type']>
-          label={t('bg.type')}
-          value={bg.type}
+          <div className="toggles">
+            <Toggle label={t('bg.pixelate')} checked={bg.pixelate} onChange={(pixelate) => setBg({ ...bg, pixelate })} />
+          </div>
+          <Slider label={t('bg.dim')} value={Math.round(bg.dim * 100)} min={0} max={80} step={5} onChange={(v) => setBg({ ...bg, dim: v / 100 })} format={(v) => `${v}%`} />
+        </>
+      )}
+      </>
+    ),
+    canvas: (
+      <>
+      <Field label={t('canvas.aspect')}>
+        <Segmented<Aspect>
+          label={t('canvas.aspect')}
+          value={o.aspect}
           columns={3}
-          onChange={switchBg}
-          options={(['theme', 'transparent', 'color', 'gradient', 'pattern', 'image'] as const).map((v) => ({ value: v, label: t(`bg.${v}` as Key) }))}
+          onChange={(aspect) => update({ aspect })}
+          options={(['auto', '1:1', '4:3', '3:4', '16:9', '9:16'] as const).map((v) => ({ value: v, label: v === 'auto' ? t('aspect.auto') : v }))}
         />
-        {bg.type === 'theme' && <ColorInput {...colorProps('background', 'bg.themeColor')} />}
-        {bg.type === 'color' && <ColorInput label={t('bg.color')} value={bg.color} onChange={(color) => setBg({ ...bg, color })} />}
-        {bg.type === 'gradient' && (
-          <>
-            <div className="grid-2">
-              <ColorInput label={t('bg.from')} value={bg.from} onChange={(from) => setBg({ ...bg, from })} />
-              <ColorInput label={t('bg.to')} value={bg.to} onChange={(to) => setBg({ ...bg, to })} />
-            </div>
-            <Slider label={t('bg.angle')} value={bg.angle} min={0} max={360} step={15} onChange={(angle) => setBg({ ...bg, angle })} format={(v) => `${v}°`} />
-            <Slider label={t('bg.steps')} hint={t('bg.steps.hint')} value={bg.steps} min={0} max={24} onChange={(steps) => setBg({ ...bg, steps })} />
-          </>
-        )}
-        {bg.type === 'pattern' && (
-          <>
-            <Field label={t('bg.kind')}>
-              <Segmented<PatternKind>
-                label={t('bg.kind')}
-                value={bg.kind}
-                onChange={(kind) => setBg({ ...bg, kind })}
-                options={(['checker', 'grid', 'dots', 'stripes'] as const).map((v) => ({ value: v, label: t(`pattern.${v}` as Key) }))}
-              />
-            </Field>
-            <div className="grid-2">
-              <ColorInput label={t('bg.color1')} value={bg.color1} onChange={(color1) => setBg({ ...bg, color1 })} />
-              <ColorInput label={t('bg.color2')} value={bg.color2} onChange={(color2) => setBg({ ...bg, color2 })} />
-            </div>
-            <Slider label={t('bg.size')} value={bg.size} min={2} max={16} onChange={(size) => setBg({ ...bg, size })} />
-          </>
-        )}
-        {bg.type === 'image' && (
-          <>
-            <div className="row">
-              <button type="button" className="btn" onClick={() => imageInput.current?.click()}>
-                <Icon name="upload" size={14} /> {t('bg.upload')}
-              </button>
-              {bg.src ? <img className="thumb" src={bg.src} alt="" /> : <span className="muted">{t('bg.noImage')}</span>}
-              <input
-                ref={imageInput}
-                type="file"
-                accept="image/*"
-                hidden
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) onImageFile(f);
-                  e.target.value = '';
-                }}
-              />
-            </div>
-            <div className="toggles">
-              <Toggle label={t('bg.pixelate')} checked={bg.pixelate} onChange={(pixelate) => setBg({ ...bg, pixelate })} />
-            </div>
-            <Slider label={t('bg.dim')} value={Math.round(bg.dim * 100)} min={0} max={80} step={5} onChange={(v) => setBg({ ...bg, dim: v / 100 })} format={(v) => `${v}%`} />
-          </>
-        )}
-      </Section>
+      </Field>
+      <Slider label={t('canvas.margin')} value={o.margin} min={0} max={40} onChange={(margin) => update({ margin })} />
+      <Slider label={t('canvas.exportScale')} value={exportScale} min={1} max={32} onChange={setExportScale} format={(v) => `×${v}`} />
+      </>
+    ),
+    embed: (
+      <>
+      <CodeBlock label={t('embed.iframe')} code={embed.iframe} t={t} toast={toast} />
+      <CodeBlock label={t('embed.react')} code={embed.react} t={t} toast={toast} />
+      <div className="row">
+        <a className="link" href={embed.url} target="_blank" rel="noreferrer">
+          {t('embed.open')} ↗
+        </a>
+        <a className="link" href={`${REPO_URL}/tree/main/src/clawd-sign`} target="_blank" rel="noreferrer">
+          {t('embed.source')} ↗
+        </a>
+      </div>
+      </>
+    ),
+  };
 
-      <Section title={t('sec.canvas')}>
-        <Field label={t('canvas.aspect')}>
-          <Segmented<Aspect>
-            label={t('canvas.aspect')}
-            value={o.aspect}
-            columns={3}
-            onChange={(aspect) => update({ aspect })}
-            options={(['auto', '1:1', '4:3', '3:4', '16:9', '9:16'] as const).map((v) => ({ value: v, label: v === 'auto' ? t('aspect.auto') : v }))}
-          />
-        </Field>
-        <Slider label={t('canvas.margin')} value={o.margin} min={0} max={40} onChange={(margin) => update({ margin })} />
-        <Slider label={t('canvas.exportScale')} value={exportScale} min={1} max={32} onChange={setExportScale} format={(v) => `×${v}`} />
-      </Section>
-
-      <Section title={t('sec.embed')} defaultOpen={false}>
-        <CodeBlock label={t('embed.iframe')} code={embed.iframe} t={t} toast={toast} />
-        <CodeBlock label={t('embed.react')} code={embed.react} t={t} toast={toast} />
-        <div className="row">
-          <a className="link" href={embed.url} target="_blank" rel="noreferrer">
-            {t('embed.open')} ↗
-          </a>
-          <a className="link" href={`${REPO_URL}/tree/main/src/clawd-sign`} target="_blank" rel="noreferrer">
-            {t('embed.source')} ↗
-          </a>
+  if (layout === 'tabs') {
+    const active = sections.includes(tab) ? tab : sections[0];
+    const move = (dir: number) => setTab(sections[(sections.indexOf(active) + dir + sections.length) % sections.length]);
+    return (
+      <div className="controls controls-tabs">
+        <div
+          className="tabs"
+          role="tablist"
+          aria-label={t('sec.settings')}
+          onKeyDown={(e) => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+              e.preventDefault();
+              move(e.key === 'ArrowRight' ? 1 : -1);
+            }
+          }}
+        >
+          {sections.map((id) => (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              id={`${baseId}-tab-${id}`}
+              aria-selected={id === active}
+              aria-controls={`${baseId}-panel`}
+              tabIndex={id === active ? 0 : -1}
+              className="tab"
+              onClick={() => setTab(id)}
+            >
+              {t(`tab.${id}` as Key)}
+            </button>
+          ))}
         </div>
-      </Section>
+        <div className="tab-panel section-body" role="tabpanel" id={`${baseId}-panel`} aria-labelledby={`${baseId}-tab-${active}`} key={active}>
+          {bodies[active]}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`controls controls-${layout}`}>
+      {sections.map((id) => (
+        <Section key={id} title={t(`sec.${id}` as Key)} collapsible={layout === 'stack'} defaultOpen={id !== 'embed'}>
+          {bodies[id]}
+        </Section>
+      ))}
     </div>
   );
 }
