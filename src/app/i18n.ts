@@ -7,6 +7,7 @@ const zh = {
   'theme.label': '主题',
   'lang.switch': 'English',
   'nav.source': '开源',
+  'repo.label': '本项目已开源',
 
   'sec.text': '文字',
   'sec.font': '字体',
@@ -152,6 +153,7 @@ const en: Dict = {
   'theme.label': 'Theme',
   'lang.switch': '中文',
   'nav.source': 'Open source',
+  'repo.label': 'Open source on GitHub',
 
   'sec.text': 'Text',
   'sec.font': 'Font',

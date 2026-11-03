@@ -233,6 +233,12 @@ export function App() {
               <Icon name="reset" size={14} /> {t('action.reset')}
             </button>
           </div>
+          <a className="repo-card" href={REPO_URL} target="_blank" rel="noreferrer">
+            <Icon name="code" size={16} />
+            <span className="repo-card-label">{t('repo.label')}</span>
+            <span className="repo-card-url">{REPO_URL}</span>
+            <span aria-hidden="true">↗</span>
+          </a>
         </section>
 
         <aside className="panel">
@@ -256,7 +262,7 @@ export function App() {
         <span>
           {t('footer.source')}{' '}
           <a href={REPO_URL} target="_blank" rel="noreferrer">
-            github.com/LangYa466/clawd-sign
+            {REPO_URL}
           </a>{' '}
           · MIT
         </span>

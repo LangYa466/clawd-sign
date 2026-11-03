@@ -233,6 +233,39 @@ a {
   flex: 1;
 }
 
+.repo-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 2px dashed var(--border-strong);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text-2);
+  font-size: 13px;
+  text-decoration: none;
+  transition: background-color 0.12s, border-color 0.12s;
+}
+
+.repo-card:hover {
+  border-color: var(--accent);
+  background: var(--surface-2);
+}
+
+.repo-card-label {
+  flex: none;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.repo-card-url {
+  flex: 1;
+  min-width: 0;
+  color: var(--accent-strong);
+  font-family: var(--mono);
+  overflow-wrap: anywhere;
+}
+
 /* ── Buttons ────────────────────────────────────────────────────────────── */
 .btn {
   display: inline-flex;
@@ -885,6 +918,11 @@ html.is-embed #root,
   }
 
   .actions-spacer {
+    display: none;
+  }
+
+  /* The sticky phone preview stays compact; the footer carries the link there. */
+  .repo-card {
     display: none;
   }
 }
