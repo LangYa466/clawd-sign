@@ -12,6 +12,7 @@ import {
 } from '../clawd-sign';
 import { shade } from './color';
 import { EXAMPLES, type Dict, type Key, type Lang } from './i18n';
+import { REPO_URL } from './constants';
 import { Icon } from './icons';
 import { ColorInput, Field, Section, Segmented, Select, Slider, Toggle } from './ui';
 
@@ -345,9 +346,14 @@ export function Controls({ options: o, update, palette, t, lang, toast, exportSc
       <Section title={t('sec.embed')} defaultOpen={false}>
         <CodeBlock label={t('embed.iframe')} code={embed.iframe} t={t} toast={toast} />
         <CodeBlock label={t('embed.react')} code={embed.react} t={t} toast={toast} />
-        <a className="link" href={embed.url} target="_blank" rel="noreferrer">
-          {t('embed.open')} ↗
-        </a>
+        <div className="row">
+          <a className="link" href={embed.url} target="_blank" rel="noreferrer">
+            {t('embed.open')} ↗
+          </a>
+          <a className="link" href={`${REPO_URL}/tree/main/src/clawd-sign`} target="_blank" rel="noreferrer">
+            {t('embed.source')} ↗
+          </a>
+        </div>
       </Section>
     </div>
   );

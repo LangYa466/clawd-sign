@@ -6,9 +6,11 @@
 A pixel-art crab holding up a sign. Everything is customizable, and the text is drawn with
 real pixel fonts that cover almost every writing system.
 
+开源地址 / Source：**<https://github.com/LangYa466/clawd-sign>**
+
 ![Clawd Sign](public/og.png)
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Flangya466%2Fclawd-sign)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FLangYa466%2Fclawd-sign)
 
 ## 功能
 

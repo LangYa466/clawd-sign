@@ -6,6 +6,7 @@ const zh = {
   'theme.system': '跟随系统',
   'theme.label': '主题',
   'lang.switch': 'English',
+  'nav.source': '开源',
 
   'sec.text': '文字',
   'sec.font': '字体',
@@ -132,9 +133,11 @@ const zh = {
   'embed.iframe': 'iframe 嵌入（可用于网页 / OBS 浏览器源）',
   'embed.react': 'React 组件',
   'embed.open': '打开纯净嵌入页',
+  'embed.source': '组件源码（GitHub）',
 
   'footer.fonts': '字体：缝合像素字体 (TakWolf) · GNU Unifont，均为 SIL OFL 1.1',
   'footer.made': '纯前端实现 · 所有渲染都在你的浏览器里完成',
+  'footer.source': '开源地址',
 };
 
 export type Dict = typeof zh;
@@ -148,6 +151,7 @@ const en: Dict = {
   'theme.system': 'System',
   'theme.label': 'Theme',
   'lang.switch': '中文',
+  'nav.source': 'Open source',
 
   'sec.text': 'Text',
   'sec.font': 'Font',
@@ -274,9 +278,11 @@ const en: Dict = {
   'embed.iframe': 'iframe (web pages, OBS browser source)',
   'embed.react': 'React component',
   'embed.open': 'Open bare embed page',
+  'embed.source': 'Component source (GitHub)',
 
   'footer.fonts': 'Fonts: Fusion Pixel Font (TakWolf) · GNU Unifont — both SIL OFL 1.1',
   'footer.made': 'Pure front-end · everything renders in your browser',
+  'footer.source': 'Source code:',
 };
 
 export type Lang = 'zh' | 'en';

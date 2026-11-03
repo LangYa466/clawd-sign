@@ -13,14 +13,13 @@ import {
   type ThemeMode,
 } from '../clawd-sign';
 import { shade } from './color';
+import { REPO_URL } from './constants';
 import { Controls, type Update } from './Controls';
 import { DICTS, detectLang, type Key, type Lang } from './i18n';
 import { Icon } from './icons';
 import { Logo } from './Logo';
 import { decodeHash, encodeHash, loadPrefs, loadSaved, reactSnippet, save, savePrefs, shareableOptions } from './state';
 import { Segmented } from './ui';
-
-const REPO_URL = 'https://github.com/langya466/clawd-sign';
 
 function initialState() {
   const shared = decodeHash(location.hash);
@@ -190,8 +189,8 @@ export function App() {
           <button type="button" className="btn btn-ghost" onClick={() => setLang(lang === 'zh' ? 'en' : 'zh')}>
             <Icon name="globe" size={14} /> {t('lang.switch')}
           </button>
-          <a className="btn btn-ghost" href={REPO_URL} target="_blank" rel="noreferrer" aria-label="GitHub">
-            <Icon name="code" size={14} /> GitHub
+          <a className="btn btn-ghost repo-link" href={REPO_URL} target="_blank" rel="noreferrer" title={REPO_URL} aria-label={`${t('nav.source')} · GitHub`}>
+            <Icon name="code" size={14} /> <span>{t('nav.source')}</span>
           </a>
         </div>
       </header>
@@ -254,9 +253,13 @@ export function App() {
       <footer className="footer">
         <span>{t('footer.made')}</span>
         <span>{t('footer.fonts')}</span>
-        <a href={REPO_URL} target="_blank" rel="noreferrer">
-          MIT · GitHub
-        </a>
+        <span>
+          {t('footer.source')}{' '}
+          <a href={REPO_URL} target="_blank" rel="noreferrer">
+            github.com/LangYa466/clawd-sign
+          </a>{' '}
+          · MIT
+        </span>
       </footer>
 
       <div className="toast-region" role="status" aria-live="polite">

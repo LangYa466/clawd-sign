@@ -902,7 +902,8 @@ html.is-embed #root,
     display: none;
   }
 
-  .top-actions a.btn-ghost {
+  /* Keep the open-source link, icon only. */
+  .repo-link span {
     display: none;
   }
 
